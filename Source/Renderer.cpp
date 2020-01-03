@@ -3,6 +3,8 @@
 #include <GDT/Matrix4f.h>
 #include <GDT/Math.h>
 
+#include "Shaders/line.glsl"
+
 void Renderer::init()
 {
     glGenVertexArrays(1, &_lineVao);
@@ -19,8 +21,8 @@ void Renderer::init()
 
     try {
         _lineShader.create();
-        _lineShader.addShader(VERTEX, "Resources/line.vert");
-        _lineShader.addShader(FRAGMENT, "Resources/line.frag");
+        _lineShader.addShader(VERTEX, line_vert);
+        _lineShader.addShader(FRAGMENT, line_frag);
         _lineShader.build();
     }
     catch (ShaderLoadingException e)
@@ -60,7 +62,7 @@ void Renderer::update()
     glBindVertexArray(_lineVao);
 
     glDrawArrays(GL_LINES, 0, _lines.size() * 2);
-    std::cout << _lines.size() << std::endl;
+    //std::cout << _lines.size() << std::endl;
 }
 
 void Renderer::drawLine(float x1, float y1, float x2, float y2)

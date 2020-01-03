@@ -5,6 +5,7 @@
 #include <GDT/Framebuffer.h>
 #include <GDT/Texture.h>
 #include <GDT/Vector2f.h>
+#include <GDT/Vector3f.h>
 #include <GDT/OpenGL.h>
 
 
@@ -37,21 +38,21 @@ public:
 
     void update()
     {
-        Geometry geom;
-        geom.vertices.push_back(Vector3f(-1, -1, 0));
-        geom.vertices.push_back(Vector3f(1, -1, 0));
-        geom.vertices.push_back(Vector3f(-1, 1, 0));
-        geom.vertices.push_back(Vector3f(1, 1, 0));
+        //Geometry geom;
+        //geom.vertices.push_back(Vector3f(-1, -1, 0));
+        //geom.vertices.push_back(Vector3f(1, -1, 0));
+        //geom.vertices.push_back(Vector3f(-1, 1, 0));
+        //geom.vertices.push_back(Vector3f(1, 1, 0));
 
-        GLuint vao;
-        glGenVertexArrays(1, &vao);
-        glBindVertexArray(vao);
-        GLuint vbo;
-        glGenBuffers(1, &vbo);
-        glBindBuffer(GL_ARRAY_BUFFER, vbo);
-        glBufferData(GL_ARRAY_BUFFER, sizeof(Vector3f) * geom.vertices.size(), geom.vertices.data(), GL_STATIC_DRAW);
-        glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 0, nullptr);
-        glEnableVertexAttribArray(0);
+        //GLuint vao;
+        //glGenVertexArrays(1, &vao);
+        //glBindVertexArray(vao);
+        //GLuint vbo;
+        //glGenBuffers(1, &vbo);
+        //glBindBuffer(GL_ARRAY_BUFFER, vbo);
+        //glBufferData(GL_ARRAY_BUFFER, sizeof(Vector3f) * geom.vertices.size(), geom.vertices.data(), GL_STATIC_DRAW);
+        //glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 0, nullptr);
+        //glEnableVertexAttribArray(0);
 
         renderer.init();
 
