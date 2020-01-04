@@ -1,4 +1,5 @@
 #include "Renderer.h"
+#include "PolyLine.h"
 
 #include <GDT/Window.h>
 
@@ -22,38 +23,14 @@ class Application : public KeyListener
 public:
     void init()
     {
-        window.create("Generative Framework", 1024, 1024);
+        window.create("OrbitLine", 1024, 1024);
         window.addKeyListener(this);
-
-        //fboTexture.create();
-        //fboTexture.bind(TextureUnit::TEXTURE0);
-        //fboTexture.setSampling(NEAREST, NEAREST);
-        //fboTexture.setData(1024, 1024, GL_RGBA8, GL_RGBA, GL_UNSIGNED_BYTE, 0);
-
-        //fbo.create();
-        //fbo.bind();
-        //fbo.addColorTexture(0, fboTexture);
-        //fbo.validate();
+        window.enableVSync(false);
     }
+
     float rot = 0;
     void update()
     {
-        //Geometry geom;
-        //geom.vertices.push_back(Vector3f(-1, -1, 0));
-        //geom.vertices.push_back(Vector3f(1, -1, 0));
-        //geom.vertices.push_back(Vector3f(-1, 1, 0));
-        //geom.vertices.push_back(Vector3f(1, 1, 0));
-
-        //GLuint vao;
-        //glGenVertexArrays(1, &vao);
-        //glBindVertexArray(vao);
-        //GLuint vbo;
-        //glGenBuffers(1, &vbo);
-        //glBindBuffer(GL_ARRAY_BUFFER, vbo);
-        //glBufferData(GL_ARRAY_BUFFER, sizeof(Vector3f) * geom.vertices.size(), geom.vertices.data(), GL_STATIC_DRAW);
-        //glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 0, nullptr);
-        //glEnableVertexAttribArray(0);
-
         renderer.init();
 
         Camera& camera = renderer.getCamera();
@@ -74,31 +51,22 @@ public:
 
                 if ((targetPoint - position).length() < 0.1)
                     targetPoint.set(distribution(generator)*6-3, distribution(generator)*6-3, distribution(generator)*6-3);
-                //targetPoint *= 5;
 
                 velocity = velocity * 0.999f + normalize(targetPoint - position) * 0.001f;
 
-                //Vector3f dir(distribution(generator)*cos(pow(time, 6)), distribution(generator)*sin(pow(time, 6)), distribution(generator));
-                //dir.normalize();
-                //dir *= 4;
-
-                //dir += (Vector3f(0) - savedPoint);
-                //dir.normalize();
-
-                //Vector3f point = savedPoint + dir * 0.05f;
-                //heading = dir;
-
                 Vector3f newPosition = position + velocity * 0.01f;
 
-                renderer.drawLine(position, newPosition);
+                if (it % 100 == 0)
+                    polyLine.addVertex(newPosition);
 
-                //savedPoint = point;
+                renderer.drawPolyline(polyLine);
+
                 position = newPosition;
 
                 glClearColor(0, 0, 0, 1);
                 glClear(GL_COLOR_BUFFER_BIT);
 
-                if (it % 100 == 0)
+                if (it % 1000 == 0)
                 {
                     rot += 0.5f;
                     renderer.modelMatrix.setIdentity();
@@ -137,6 +105,8 @@ private:
     Vector3f targetPoint;
     Vector3f position;
     Vector3f velocity;
+
+    PolyLine polyLine;
 
     bool stop = false;
 };
