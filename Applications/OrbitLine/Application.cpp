@@ -35,7 +35,7 @@ public:
         //fbo.addColorTexture(0, fboTexture);
         //fbo.validate();
     }
-
+    float rot = 0;
     void update()
     {
         //Geometry geom;
@@ -55,6 +55,13 @@ public:
         //glEnableVertexAttribArray(0);
 
         renderer.init();
+
+        Camera& camera = renderer.getCamera();
+        camera.zNear = 0.1f;
+        camera.zFar = 30.0f;
+        camera.fovy = 60;
+        camera.aspect = 1;
+        camera.position = Vector3f(0, 0, 10);
 
         float time = 0;
         int it = 0;
@@ -93,6 +100,10 @@ public:
 
                 if (it % 100 == 0)
                 {
+                    rot += 0.5f;
+                    renderer.modelMatrix.setIdentity();
+                    renderer.modelMatrix.rotate(rot, 0, 1, 0);
+
                     renderer.update();
 
                     window.update();

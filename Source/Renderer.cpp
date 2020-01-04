@@ -1,6 +1,5 @@
 #include "Renderer.h"
 
-#include <GDT/Matrix4f.h>
 #include <GDT/Math.h>
 
 #include "Shaders/line.glsl"
@@ -30,7 +29,7 @@ void Renderer::init()
         std::cout << e.what() << std::endl;
     }
 }
-float rot = 0;
+
 int startIndex = 0;
 void Renderer::update()
 {
@@ -40,23 +39,21 @@ void Renderer::update()
     _lineShader.bind();
 
     Matrix4f projMatrix;
-    float fovyr = 60 * Math::PI / 180;
-    float aspect = 1;
-    float zNear = 0.1f;
-    float zFar = 40.0f;
-    projMatrix[0] = (float)(1 / tan(fovyr / 2)) / aspect;
+    float fovyr = camera.fovy * Math::PI / 180;
+
+    projMatrix[0] = (float)(1 / tan(fovyr / 2)) / camera.aspect;
     projMatrix[5] = (float)(1 / tan(fovyr / 2));
-    projMatrix[10] = (zNear + zFar) / (zNear - zFar);
+    projMatrix[10] = (camera.zNear + camera.zFar) / (camera.zNear - camera.zFar);
     projMatrix[11] = -1;
-    projMatrix[14] = (2 * zNear * zFar) / (zNear - zFar);
+    projMatrix[14] = (2 * camera.zNear * camera.zFar) / (camera.zNear - camera.zFar);
     projMatrix[15] = -0;
 
-    Matrix4f modelMatrix;
-    rot += 0.5f;
-    modelMatrix.translate(Vector3f(0, 0, -10));
-    modelMatrix.rotate(rot, 0, 1, 0);
+    Matrix4f viewMatrix;
+    viewMatrix.rotate(camera.rotation);
+    viewMatrix.translate(-camera.position);
 
     _lineShader.uniformMatrix4f("projMatrix", projMatrix);
+    _lineShader.uniformMatrix4f("viewMatrix", viewMatrix);
     _lineShader.uniformMatrix4f("modelMatrix", modelMatrix);
 
     glBindVertexArray(_lineVao);

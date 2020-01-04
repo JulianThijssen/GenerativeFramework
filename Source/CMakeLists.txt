@@ -5,6 +5,8 @@ set(LIBRARY_SOURCES
     ${DIR}/Geometry.cpp
     ${DIR}/Renderer.h
     ${DIR}/Renderer.cpp
+    ${DIR}/Camera.h
+    ${DIR}/Camera.cpp
     PARENT_SCOPE
 )
 
@@ -16,5 +18,6 @@ set(SHADER_SOURCES
 set(LIBRARY_PUBLIC_HEADERS
     ${DIR}/Geometry.h
     ${DIR}/Renderer.h
+    ${DIR}/Camera.h
     PARENT_SCOPE
 )
