@@ -7,6 +7,7 @@
 #include <GDT/Texture.h>
 #include <GDT/Vector2f.h>
 #include <GDT/Vector3f.h>
+#include <GDT/Math.h>
 #include <GDT/OpenGL.h>
 
 
@@ -45,6 +46,13 @@ public:
         camera.aspect = 1;
         camera.position = Vector3f(0, 0, 2);
 
+        for (int i = 0; i < 10000; i++)
+        {
+            float u1 = distribution(generator) * 2 - 1;
+            float u2 = distribution(generator) * 2 - 1;
+            drops.push_back({ Vector2f(u1, u2), 1 });
+        }
+
         while (!window.shouldClose())
         {
             glClearColor(0, 0, 0, 1);
@@ -55,7 +63,7 @@ public:
                 continue;
             }
             // Generate new drops
-            for (int i = 0; i < 40; i++)
+            for (int i = 0; i < 100; i++)
             {
                 float u1 = distribution(generator) * 2 - 1;
                 float u2 = distribution(generator) * 2 - 1;
@@ -66,18 +74,39 @@ public:
             for (int i = 0; i < drops.size(); i++)
             {
                 Drop& a = drops[i];
-                if (a.radius < 0.5f)
+                if (a.radius < 0.1f)
                     continue;
 
                 for (int j = i + 1; j < drops.size(); j++)
                 {
                     Drop& b = drops[j];
 
-                    if ((a.pos - b.pos).length() < (a.radius + b.radius) * 0.005f)
+                    float dist = (a.pos - b.pos).length();
+                    if (dist < (a.radius + b.radius) * 0.005f)
                     {
-                        a.radius += b.radius / a.radius;
+                        float aArea = Math::PI * a.radius * a.radius;
+                        float bArea = Math::PI * b.radius * b.radius;
+                        a.radius = sqrt((aArea + bArea) / Math::PI);
                         b.radius = 0;
+                        //b.pos += normalize(a.pos - b.pos) * 0.002;
                     }
+                    //if (dist < 0.005f * a.radius)
+                    //{
+                    //    float aArea = Math::PI * a.radius * a.radius;
+                    //    float bArea = Math::PI * b.radius * b.radius;
+                    //    a.radius = sqrt((aArea + bArea) / Math::PI);
+                    //    b.radius = 0;
+                    //}
+                }
+            }
+
+            // Drop gravity
+            for (Drop& drop : drops)
+            {
+                if (drop.radius > 5)
+                {
+                    drop.pos += Vector2f(0, -0.002f * drop.radius);
+                    drop.radius -= 0.3f;
                 }
             }
 
