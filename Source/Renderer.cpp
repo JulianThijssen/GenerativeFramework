@@ -33,9 +33,6 @@ void Renderer::init()
 int startIndex = 0;
 void Renderer::update()
 {
-    glBindBuffer(GL_ARRAY_BUFFER, _lineVbo);
-    glBufferData(GL_ARRAY_BUFFER, sizeof(Vector3f) * (_lines.size()-startIndex) * 2, _lines.data() + startIndex, GL_STREAM_DRAW);
-
     _lineShader.bind();
 
     Matrix4f projMatrix;
@@ -49,7 +46,7 @@ void Renderer::update()
     projMatrix[15] = -0;
 
     Matrix4f viewMatrix;
-    viewMatrix.rotate(camera.rotation);
+    viewMatrix.rotate(-camera.rotation);
     viewMatrix.translate(-camera.position);
 
     _lineShader.uniformMatrix4f("projMatrix", projMatrix);
@@ -57,9 +54,33 @@ void Renderer::update()
     _lineShader.uniformMatrix4f("modelMatrix", modelMatrix);
 
     glBindVertexArray(_lineVao);
+    glBindBuffer(GL_ARRAY_BUFFER, _lineVbo);
 
-    glDrawArrays(GL_LINES, 0, _lines.size() * 2);
-    //std::cout << _lines.size() << std::endl;
+    for (PolyLine& polyLine : _polyLines)
+    {
+        glBufferData(GL_ARRAY_BUFFER, sizeof(Vector3f) * polyLine.getVertices().size(), polyLine.getVertices().data(), GL_STREAM_DRAW);
+        glDrawArrays(GL_LINE_STRIP, 0, polyLine.getVertices().size());
+    }
+    for (Circle& circle : _circles)
+    {
+        std::vector<Vector3f> vertices;
+        for (int seg = 0; seg < 32; seg++)
+        {
+            float angle = (seg / 32.0) * Math::TWO_PI;
+            vertices.emplace_back(circle.position.x + cos(angle) * circle.radius, circle.position.y + sin(angle) * circle.radius, 0);
+        }
+        vertices.emplace_back(circle.position.x + cos(0) * circle.radius, circle.position.y + sin(0) * circle.radius, 0);
+        glBufferData(GL_ARRAY_BUFFER, sizeof(Vector3f) * vertices.size(), vertices.data(), GL_STREAM_DRAW);
+        glDrawArrays(GL_LINE_STRIP, 0, vertices.size());
+    }
+
+    _polyLines.clear();
+    _circles.clear();
+}
+
+void Renderer::drawPolyline(PolyLine polyLine)
+{
+    _polyLines.push_back(polyLine);
 }
 
 void Renderer::drawLine(float x1, float y1, float x2, float y2)
@@ -71,4 +92,9 @@ void Renderer::drawLine(Vector3f v1, Vector3f v2)
 {
     _lines.push_back(Line{ Vector3f(v1.x, v1.y, v1.z), Vector3f(v2.x, v2.y, v2.z) });
     startIndex = _lines.size() > 9999 ? _lines.size() - 10000 : 0;
+}
+
+void Renderer::drawCircle(Vector2f position, float radius)
+{
+    _circles.push_back(Circle{ position, radius });
 }

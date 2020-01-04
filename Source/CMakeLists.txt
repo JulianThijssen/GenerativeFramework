@@ -7,6 +7,9 @@ set(LIBRARY_SOURCES
     ${DIR}/Renderer.cpp
     ${DIR}/Camera.h
     ${DIR}/Camera.cpp
+    ${DIR}/PolyLine.h
+    ${DIR}/PolyLine.cpp
+    ${DIR}/Circle.h
     PARENT_SCOPE
 )
 
@@ -19,5 +22,7 @@ set(LIBRARY_PUBLIC_HEADERS
     ${DIR}/Geometry.h
     ${DIR}/Renderer.h
     ${DIR}/Camera.h
+    ${DIR}/PolyLine.h
+    ${DIR}/Circle.h
     PARENT_SCOPE
 )
