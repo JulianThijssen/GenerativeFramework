@@ -53,4 +53,6 @@ install(TARGETS ${AutonomicLib}
 ######################################## Applications #########################################
 add_subdirectory(Applications/OrbitLine)
 #add_dependencies(${AutonomicLib} ${OrbitLine})
+add_subdirectory(Applications/Drops)
 add_subdirectory(Applications/EvoTest)
+add_subdirectory(Applications/EMWaves)

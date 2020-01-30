@@ -3,6 +3,7 @@ cmake_minimum_required (VERSION 3.8)
 
 # Set our Includes folder as the place to look for library includes
 include_directories(${CMAKE_SOURCE_DIR}/Output/include/)
+include_directories(${CMAKE_CURRENT_SOURCE_DIR})
 
 # Store the name of our project in a variable
 set(EvoTest "EvoTest")
@@ -19,3 +20,4 @@ source_group(Source FILES Application.cpp)
 target_link_libraries (${EvoTest} ${CMAKE_SOURCE_DIR}/Output/lib/$<CONFIGURATION>/Autonomic.lib)
 target_link_libraries (${EvoTest} ${CMAKE_SOURCE_DIR}/3rdParty/Libraries/glfw3.lib)
 target_link_libraries (${EvoTest} ${CMAKE_SOURCE_DIR}/3rdParty/Libraries/$<CONFIGURATION>/GDT.lib)
+target_link_libraries (${EvoTest} ${CMAKE_CURRENT_SOURCE_DIR}/box2d.lib)
