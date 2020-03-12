@@ -2,10 +2,29 @@
 
 #include <GDT/Math.h>
 
-#include "Shaders/line.glsl"
+#define GLSL(version, shader)  "#version " #version " core\n" #shader
 
-void Renderer::init()
+#include "Shaders/line.glsl"
+#include "Shaders/quad.glsl"
+#include "Shaders/texture.glsl"
+
+void Renderer::init(int width, int height)
 {
+    // Set up main framebuffer
+    _mainTexture.create();
+    _mainTexture.bind(TextureUnit::TEXTURE0);
+    _mainTexture.setData(width, height, GL_RGBA8, GL_RGBA, GL_UNSIGNED_BYTE, nullptr);
+    _mainTexture.setSampling(NEAREST, NEAREST);
+    _mainTexture.setWrapping(CLAMP, CLAMP);
+
+    _mainFramebuffer.create();
+    _mainFramebuffer.bind(Framebuffer::BOTH);
+    _mainFramebuffer.addColorTexture(0, _mainTexture);
+    _mainFramebuffer.validate();
+
+    // Set up unit quad vao
+    glGenVertexArrays(1, &_unitQuadVao);
+
     // Line VAO
     glGenVertexArrays(1, &_lineVao);
     glBindVertexArray(_lineVao);
@@ -56,6 +75,11 @@ void Renderer::init()
         _lineShader.addShader(VERTEX, line_vert);
         _lineShader.addShader(FRAGMENT, line_frag);
         _lineShader.build();
+
+        _quadShader.create();
+        _quadShader.addShader(VERTEX, quad_vert);
+        _quadShader.addShader(FRAGMENT, texture_frag);
+        _quadShader.build();
     }
     catch (ShaderLoadingException e)
     {
@@ -63,9 +87,10 @@ void Renderer::init()
     }
 }
 
-int startIndex = 0;
 void Renderer::update()
 {
+    _mainFramebuffer.bind();
+
     _lineShader.bind();
 
     Matrix4f projMatrix;
@@ -118,6 +143,30 @@ void Renderer::update()
     _lines.clear();
     _polyLines.clear();
     _circles.clear();
+
+    _mainFramebuffer.release();
+    glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+
+    _quadShader.bind();
+    glBindVertexArray(_unitQuadVao);
+
+    _mainTexture.bind(TextureUnit::TEXTURE0);
+    _quadShader.uniform1i("tex", 0);
+
+    glDrawArrays(GL_TRIANGLE_STRIP, 0, 4);
+}
+
+void Renderer::clear()
+{
+    _mainFramebuffer.bind();
+    _mainFramebuffer.clearColorBuffer(0, 0.0f, 0.0f, 0.0f, 1.0f);
+}
+
+void Renderer::saveFramebufferContents(std::vector<unsigned char>& pixels)
+{
+    pixels.resize(_mainTexture.getWidth() * _mainTexture.getHeight() * 4);
+    _mainTexture.bind(TextureUnit::TEXTURE0);
+    glGetTexImage(GL_TEXTURE_2D, 0, GL_RGBA, GL_UNSIGNED_BYTE, pixels.data());
 }
 
 void Renderer::drawPolyline(PolyLine polyLine)

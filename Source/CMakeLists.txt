@@ -10,6 +10,8 @@ set(LIBRARY_SOURCES
     ${DIR}/PolyLine.h
     ${DIR}/PolyLine.cpp
     ${DIR}/Circle.h
+    ${DIR}/Recorder.h
+    ${DIR}/Recorder.cpp
     PARENT_SCOPE
 )
 
@@ -24,5 +26,6 @@ set(LIBRARY_PUBLIC_HEADERS
     ${DIR}/Camera.h
     ${DIR}/PolyLine.h
     ${DIR}/Circle.h
+    ${DIR}/Recorder.h
     PARENT_SCOPE
 )
