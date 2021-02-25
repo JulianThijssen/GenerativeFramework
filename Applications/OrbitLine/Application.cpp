@@ -31,7 +31,7 @@ public:
     float rot = 0;
     void update()
     {
-        renderer.init();
+        renderer.init(window.getWidth(), window.getHeight());
 
         Camera& camera = renderer.getCamera();
         camera.zNear = 0.1f;

@@ -8,6 +8,83 @@
 #include "Shaders/quad.glsl"
 #include "Shaders/texture.glsl"
 
+CircleObject CreateCircleVao()
+{
+    // Circle instanced VAO
+    std::vector<Vector3f> vertices;
+    for (int seg = 0; seg < 32; seg++)
+    {
+        float angle = (seg / 32.0) * Math::TWO_PI;
+        vertices.emplace_back(cos(angle), sin(angle), 0);
+    }
+    vertices.emplace_back(1, 0, 0);
+
+    CircleObject obj;
+    glGenVertexArrays(1, &obj.vao);
+    glBindVertexArray(obj.vao);
+
+    glGenBuffers(1, &obj.vbo);
+    glBindBuffer(GL_ARRAY_BUFFER, obj.vbo);
+    glBufferData(GL_ARRAY_BUFFER, sizeof(Vector3f) * vertices.size(), vertices.data(), GL_STATIC_DRAW);
+    glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 0, 0);
+    glEnableVertexAttribArray(0);
+
+    glGenBuffers(1, &obj.propertyVbo);
+    glBindBuffer(GL_ARRAY_BUFFER, obj.propertyVbo);
+    glBufferData(GL_ARRAY_BUFFER, 0, nullptr, GL_STREAM_DRAW);
+    glVertexAttribPointer(1, 4, GL_FLOAT, GL_FALSE, 0, 0);
+    glEnableVertexAttribArray(1);
+    glVertexAttribDivisor(1, 1);
+
+    glGenBuffers(1, &obj.colorVbo);
+    glBindBuffer(GL_ARRAY_BUFFER, obj.colorVbo);
+    glBufferData(GL_ARRAY_BUFFER, 0, nullptr, GL_STREAM_DRAW);
+    glVertexAttribPointer(2, 3, GL_FLOAT, GL_FALSE, 0, 0);
+    glEnableVertexAttribArray(2);
+    glVertexAttribDivisor(2, 1);
+
+    return obj;
+}
+
+FilledCircleObject CreateFilledCircleVao()
+{
+    // Filled circle instanced VAO
+    std::vector<Vector3f> vertices;
+    vertices.emplace_back(0, 0, 0);
+    for (int seg = 0; seg < 32; seg++)
+    {
+        float angle = (seg / 32.0) * Math::TWO_PI;
+        vertices.emplace_back(cos(angle), sin(angle), 0);
+    }
+    vertices.emplace_back(1, 0, 0);
+
+    FilledCircleObject obj;
+    glGenVertexArrays(1, &obj.vao);
+    glBindVertexArray(obj.vao);
+
+    glGenBuffers(1, &obj.vbo);
+    glBindBuffer(GL_ARRAY_BUFFER, obj.vbo);
+    glBufferData(GL_ARRAY_BUFFER, sizeof(Vector3f) * vertices.size(), vertices.data(), GL_STATIC_DRAW);
+    glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 0, 0);
+    glEnableVertexAttribArray(0);
+
+    glGenBuffers(1, &obj.propertyVbo);
+    glBindBuffer(GL_ARRAY_BUFFER, obj.propertyVbo);
+    glBufferData(GL_ARRAY_BUFFER, 0, nullptr, GL_STREAM_DRAW);
+    glVertexAttribPointer(1, 4, GL_FLOAT, GL_FALSE, 0, 0);
+    glEnableVertexAttribArray(1);
+    glVertexAttribDivisor(1, 1);
+
+    glGenBuffers(1, &obj.colorVbo);
+    glBindBuffer(GL_ARRAY_BUFFER, obj.colorVbo);
+    glBufferData(GL_ARRAY_BUFFER, 0, nullptr, GL_STREAM_DRAW);
+    glVertexAttribPointer(2, 3, GL_FLOAT, GL_FALSE, 0, 0);
+    glEnableVertexAttribArray(2);
+    glVertexAttribDivisor(2, 1);
+
+    return obj;
+}
+
 void Renderer::init(int width, int height)
 {
     // Set up main framebuffer
@@ -36,39 +113,11 @@ void Renderer::init(int width, int height)
     glEnableVertexAttribArray(0);
 
     // Circle instanced VAO
-    std::vector<Vector3f> vertices;
-    for (int seg = 0; seg < 32; seg++)
-    {
-        float angle = (seg / 32.0) * Math::TWO_PI;
-        vertices.emplace_back(cos(angle), sin(angle), 0);
-    }
-    vertices.emplace_back(1, 0, 0);
-
-    glGenVertexArrays(1, &_circleVao);
-    glBindVertexArray(_circleVao);
-
-    glGenBuffers(1, &_circleVbo);
-    glBindBuffer(GL_ARRAY_BUFFER, _circleVbo);
-    glBufferData(GL_ARRAY_BUFFER, sizeof(Vector3f) * vertices.size(), vertices.data(), GL_STATIC_DRAW);
-    glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 0, 0);
-    glEnableVertexAttribArray(0);
-
-    glGenBuffers(1, &_circlePropertyVbo);
-    glBindBuffer(GL_ARRAY_BUFFER, _circlePropertyVbo);
-    glBufferData(GL_ARRAY_BUFFER, 0, nullptr, GL_STREAM_DRAW);
-    glVertexAttribPointer(1, 4, GL_FLOAT, GL_FALSE, 0, 0);
-    glEnableVertexAttribArray(1);
-    glVertexAttribDivisor(1, 1);
-
-    glGenBuffers(1, &_circleColorVbo);
-    glBindBuffer(GL_ARRAY_BUFFER, _circleColorVbo);
-    glBufferData(GL_ARRAY_BUFFER, 0, nullptr, GL_STREAM_DRAW);
-    glVertexAttribPointer(2, 3, GL_FLOAT, GL_FALSE, 0, 0);
-    glEnableVertexAttribArray(2);
-    glVertexAttribDivisor(2, 1);
+    _circleObject = CreateCircleVao();
+    _filledCircleObject = CreateFilledCircleVao();
 
     glEnable(GL_BLEND);
-    glBlendFunc(GL_SRC_ALPHA, GL_ONE);
+    glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 
     try {
         _lineShader.create();
@@ -116,6 +165,7 @@ void Renderer::update()
 
     // Draw lines
     _lineShader.uniform1i("useColorAttribute", 0);
+    _lineShader.uniform3f("colorUniform", 1, 1, 1);
     glBufferData(GL_ARRAY_BUFFER, sizeof(Line) * _lines.size(), _lines.data(), GL_STREAM_DRAW);
     glDrawArrays(GL_LINES, 0, _lines.size() * 2);
 
@@ -133,16 +183,33 @@ void Renderer::update()
         circleProperties.emplace_back(circle.position.x, circle.position.y, 0, circle.radius);
         circleColors.push_back(circle.color);
     }
-    glBindVertexArray(_circleVao);
-    glBindBuffer(GL_ARRAY_BUFFER, _circlePropertyVbo);
+    glBindVertexArray(_circleObject.vao);
+    glBindBuffer(GL_ARRAY_BUFFER, _circleObject.propertyVbo);
     glBufferData(GL_ARRAY_BUFFER, sizeof(Vector4f) * circleProperties.size(), circleProperties.data(), GL_STREAM_DRAW);
-    glBindBuffer(GL_ARRAY_BUFFER, _circleColorVbo);
+    glBindBuffer(GL_ARRAY_BUFFER, _circleObject.colorVbo);
     glBufferData(GL_ARRAY_BUFFER, sizeof(Vector3f) * circleColors.size(), circleColors.data(), GL_STREAM_DRAW);
     glDrawArraysInstanced(GL_LINE_STRIP, 0, 33, _circles.size());
+
+    // Filled polygons
+    std::vector<Vector4f> filledCircleProperties;
+    std::vector<Vector3f> filledCircleColors;
+    for (Circle& circle : _filledCircles)
+    {
+        filledCircleProperties.emplace_back(circle.position.x, circle.position.y, 0, circle.radius);
+        filledCircleColors.push_back(circle.color);
+    }
+    glBindVertexArray(_filledCircleObject.vao);
+    glBindBuffer(GL_ARRAY_BUFFER, _filledCircleObject.propertyVbo);
+    glBufferData(GL_ARRAY_BUFFER, sizeof(Vector4f) * filledCircleProperties.size(), filledCircleProperties.data(), GL_STREAM_DRAW);
+    glBindBuffer(GL_ARRAY_BUFFER, _filledCircleObject.colorVbo);
+    glBufferData(GL_ARRAY_BUFFER, sizeof(Vector3f) * filledCircleColors.size(), filledCircleColors.data(), GL_STREAM_DRAW);
+    glDrawArraysInstanced(GL_TRIANGLE_FAN, 0, 34, _filledCircles.size());
+
 
     _lines.clear();
     _polyLines.clear();
     _circles.clear();
+    _filledCircles.clear();
 
     _mainFramebuffer.release();
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
@@ -179,13 +246,23 @@ void Renderer::drawLine(float x1, float y1, float x2, float y2)
     _lines.push_back(Line{ Vector3f(x1, y1, 0), Vector3f(x2, y2, 0) });
 }
 
+void Renderer::drawLine(const Vector2f& v1, const Vector2f& v2, Vector3f color)
+{
+    _lines.push_back(Line{ Vector3f(v1.x, v1.y, 0), Vector3f(v2.x, v2.y, 0) });
+}
+
 void Renderer::drawLine(const Vector3f& v1, const Vector3f& v2)
 {
     _lines.push_back(Line{ v1, v2 });
     //startIndex = _lines.size() > 9999 ? _lines.size() - 10000 : 0;
 }
 
-void Renderer::drawCircle(Vector2f position, float radius, Vector3f color = Vector3f(1, 1, 1))
+void Renderer::drawCircle(Vector2f position, float radius, Vector3f color)
 {
     _circles.push_back(Circle{ position, radius, color });
+}
+
+void Renderer::drawFilledCircle(Vector2f position, float radius, Vector3f color)
+{
+    _filledCircles.push_back(Circle{ position, radius, color });
 }

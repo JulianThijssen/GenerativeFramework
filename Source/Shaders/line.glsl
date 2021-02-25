@@ -1,5 +1,3 @@
-#define GLSL(version, shader)  "#version " #version " core\n" #shader
-
 const char* line_vert = GLSL(330,
     uniform mat4 projMatrix;
     uniform mat4 viewMatrix;
